@@ -29,7 +29,7 @@ class Actor(nn.Module):
         out_dim: int,
         log_std_min: float = -20,
         log_std_max: float = 2,
-        hidden_dim: int = 128
+        hidden_dim: int = 256
     ):
         """Initialize.You can design your own Actor architecture."""
         super(Actor, self).__init__()
@@ -77,7 +77,7 @@ class Actor(nn.Module):
 
 
 class CriticQ(nn.Module):
-    def __init__(self, in_dim: int, hidden_dim: int = 128):
+    def __init__(self, in_dim: int, hidden_dim: int = 256):
         """Initialize. You can design your own Q Critic architecture."""
         super(CriticQ, self).__init__()
 
@@ -375,8 +375,6 @@ class SACAgent:
                 "v loss": vf_loss,
                 "alpha loss": alpha_loss
                 }) 
-            if ep>300:
-                break
         self.env.close()
 
     def test(self, video_folder: str):
@@ -447,14 +445,14 @@ def seed_torch(seed):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--wandb-run-name", type=str, default="pendulum-sac")
-    parser.add_argument("--lr", type=float, default=3e-4)#
+    parser.add_argument("--wandb-run-name", type=str, default="halfcheetah-sac")
+    parser.add_argument("--lr", type=float, default=3e-4)
     parser.add_argument("--discount-factor", type=float, default=0.99)
-    parser.add_argument("--tau", type=float, default=5e-3)#
+    parser.add_argument("--tau", type=float, default=5e-3)
     parser.add_argument("--batch-size", type=int, default=64)
     parser.add_argument("--initial-random-steps", type=int, default=5e3)#1000
-    parser.add_argument("--memory-size", type=int, default=100000)
-    parser.add_argument("--num-steps", type=float, default=100000)
+    parser.add_argument("--memory-size", type=int, default=1_000_000)
+    parser.add_argument("--num-steps", type=float, default=1_000_000)
     parser.add_argument("--policy-update-freq", type=int, default=2)
     parser.add_argument("--seed", type=int, default=77)
     args = parser.parse_args()
@@ -465,10 +463,10 @@ if __name__ == "__main__":
     seed_torch(args.seed) 
     
     # W&B init
-    wandb.init(project="RL-HW3-SAC-Pendulum", name=args.wandb_run_name, save_code=True)
+    wandb.init(project="RL-HW3-SAC-HalfCheetah", name=args.wandb_run_name, save_code=True)
     
     # environment
-    env = gym.make("Pendulum-v1", render_mode="rgb_array")
+    env = gym.make('HalfCheetah-v5', render_mode="rgb_array")
     env = ActionNormalizer(env)
     agent = SACAgent(env, args)
     agent.train()
